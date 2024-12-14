@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gift Clicker Game</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+        }
+        #gameArea {
+            width: 100%;
+            height: 80vh;
+            position: relative;
+            background-color: #ffffff;
+            overflow: hidden;
+            border: 2px solid #ddd;
+            margin-top: 20px;
+        }
+        #giftBox {
+            font-size: 40px;
+            position: absolute;
+            cursor: pointer;
+            animation: bounce 1s infinite;
+        }
+        #score {
+            font-size: 24px;
+            margin: 10px 0;
+        }
+        #timer {
+            font-size: 20px;
+            color: red;
+        }
+        #footer {
+            font-size: 14px;
+            color: #666;
+            margin-top: 20px;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        .winMessage, .loseMessage {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: #fff;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0px 0px 15px rgba(0,0,0,0.2);
+            font-size: 24px;
+            font-weight: bold;
+            color: #28a745;
+            animation: popUp 0.5s ease-in-out;
+        }
+        .loseMessage {
+            border-color: #dc3545;
+            color: #dc3545;
+        }
+        @keyframes popUp {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+        .celebrate {
+            font-size: 18px;
+            margin-top: 10px;
+            color: #ff5722;
+        }
+        .distraction {
+            font-size: 30px;
+            position: absolute;
+            pointer-events: none;
+            animation: popOut 1s ease-in-out;
+        }
+        @keyframes popOut {
+            0% {
+                opacity: 1;
+            }
+            100% {
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Gift Clicker Game</h1>
+    <p id="instructions">Click on the gift 🎁 as many times as you can in 60 seconds! Reach a score of 100 or more to win!</p>
+    <div id="score">Score: 0</div>
+    <div id="timer">Time: 60s</div>
+    <div id="gameArea">
+        <div id="giftBox">🎁</div>
+        <!-- Distraction emojis will be added here -->
+    </div>
+    <div id="footer">Game provided by D-TECH, issued by preasx24</div>
+
+    <div id="winMessage" class="winMessage">
+        🎉 Congratulations! 🎉<br><br>
+        You reached a score of <strong id="finalScore"></strong>!<br><br>
+        <strong>You win the gift! 🎁</strong><br><br>
+        Take a screenshot and share it in the group chat to claim your prize!
+    </div>
+
+    <div id="loseMessage" class="loseMessage">
+        😔 Oops! 😔<br><br>
+        Time’s up! Your final score is <strong id="finalScoreLose"></strong>.<br><br>
+        Better luck next time! Maybe you’ll do better next time, but don't worry, there's always a chance for improvement!
+    </div>
+
+    <script>
+        const giftBox = document.getElementById('giftBox');
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const winMessage = document.getElementById('winMessage');
+        const loseMessage = document.getElementById('loseMessage');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const finalScoreDisplayLose = document.getElementById('finalScoreLose');
+        const gameArea = document.getElementById('gameArea');
+        let score = 0;
+        let timeLeft = 60;
+        const targetScore = 100;
+        const distractions = ['❌', '💩', '👻'];
+
+        function moveGiftBox() {
+            const x = Math.random() * (gameArea.offsetWidth - giftBox.offsetWidth);
+            const y = Math.random() * (gameArea.offsetHeight - giftBox.offsetHeight);
+            giftBox.style.left = `${x}px`;
+            giftBox.style.top = `${y}px`;
+        }
+
+        function showDistraction() {
+            const distraction = document.createElement('div');
+            distraction.textContent = distractions[Math.floor(Math.random() * distractions.length)];
+            distraction.className = 'distraction';
+            distraction.style.left = `${Math.random() * (gameArea.offsetWidth - 30)}px`;
+            distraction.style.top = `${Math.random() * (gameArea.offsetHeight - 30)}px`;
+            gameArea.appendChild(distraction);
+            setTimeout(() => {
+                distraction.remove();
+            }, 1000);
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 60;
+            scoreDisplay.textContent = `Score: ${score}`;
+            timerDisplay.textContent = `Time: ${timeLeft}s`;
+
+            giftBox.addEventListener('click', () => {
+                score++;
+                scoreDisplay.textContent = `Score: ${score}`;
+                moveGiftBox();
+            });
+
+            const distractionInterval = setInterval(() => {
+                if (Math.random() < 0.3) { // Adjust probability as needed
+                    showDistraction();
+                }
+            }, 4000); // Distractions appear every 4 seconds
+
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `Time: ${timeLeft}s`;
+                if (timeLeft === 0) {
+                    clearInterval(timerInterval);
+                    clearInterval(distractionInterval);
+                    giftBox.style.display = 'none';
+                    finalScoreDisplay.textContent = score;
+                    finalScoreDisplayLose.textContent = score;
+                    if (score >= targetScore) {
+                        winMessage.style.display = 'block';
+                    } else {
+                        loseMessage.style.display = 'block';
+                    }
+                }
+            }, 1000);
+
+            moveGiftBox();
+        }
+
+        startGame();
+    </script>
+
+</body>
+</html>
